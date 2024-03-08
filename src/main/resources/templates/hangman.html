@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hangman</title>
+</head>
+<body>
+<h1 th:text="${title}">Title</h1>
+
+<p>
+<h2 th:text="${startGameText}">Start Game</h2>
+<button onclick="startHangman()" type="submit">Start</button>
+</p>
+
+<p>
+<h2 th:text="${guessLetterText}">Guess a letter</h2>
+<form onsubmit="return false">
+    <input autocomplete="off" id="guessLetter" maxlength="1" type="text">
+    <button id="guessLetterButton" type="submit">Guess</button>
+</form>
+
+
+</p>
+
+<div id="wordField">
+    <p id="guessedWord"></p>
+    <p id="tries"></p>
+    <p id="guessedLetters"></p>
+</div>
+<canvas height="400" id="hangmanCanvas" width="400">
+
+</canvas>
+<p id="messageField"></p>
+<p id="errorField"></p>
+<script src="/javascript/hangman.js"></script>
+
+</body>
+
+</html>
