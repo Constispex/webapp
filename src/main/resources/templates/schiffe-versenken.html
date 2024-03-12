@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schiffe Versenken</title>
+</head>
+<body>
+<h1>Willkommen</h1>
+<p>Willkommen zum Spiel Schiffe Versenken</p>
+
+<p>Gib deinen Namen ein:</p>
+<p>Name</p>
+<input id="player_name" type="text">
+<form>
+    <p>Start Game</p>
+    <button id="start_game" type="submit" value="Start Game">Start Game</button>
+</form>
+
+<form>
+    <p>Join Game</p>
+    <input id="join_id" type="text">
+    <button type="submit" value="Join Game">Join Game</button>
+</form>
+</body>
+<script>
+    const playerName = document.getElementById('player_name');
+    const joinId = document.getElementById('join_id');
+    const startGame = document.getElementById('start_game');
+    const svUrl = "/schiffe-versenken";
+
+    startGame.addEventListener("click", ev => {
+        ev.preventDefault()
+        fetch(svUrl + "/createGame", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({playerName: playerName.value})
+        })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                window.location.href = "http://localhost:8080" + svUrl + "/game/" + data;
+            })
+            .catch(error => console.error(error));
+
+    })
+</script>
+</html>
