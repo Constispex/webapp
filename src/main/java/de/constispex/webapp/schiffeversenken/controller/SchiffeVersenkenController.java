@@ -18,10 +18,10 @@ public class SchiffeVersenkenController {
         return String.valueOf(game.getId());
     }
 
-    @GetMapping(URL + "/joinGame/{gameId}/{playerName}")
-    public String joinGame(@PathVariable int gameId, @PathVariable String playerName) {
+    @PostMapping(URL + "/join/{gameId}")
+    public String joinGame(@PathVariable int gameId, @RequestBody PlayerInfo playerInfo) {
         try {
-            Player player = new Player(playerName);
+            Player player = new Player(playerInfo.getPlayerName());
             service.joinGame(gameId, player);
         } catch (IllegalArgumentException e) {
             return "Game not found";
@@ -29,20 +29,7 @@ public class SchiffeVersenkenController {
         return String.valueOf(gameId);
     }
 
-    @GetMapping(URL + "/game/{gameId}")
-    public String startGame(@PathVariable int gameId) {
-        try {
-            Game game = service.getGame(gameId);
-            game.start();
-        } catch (IllegalArgumentException e) {
-            return "Game not found";
-        } catch (NullPointerException n) {
-            return "Game is not full yet";
-        }
-        return "Game started";
-    }
-
-    @GetMapping(URL + "/attack/{gameId}/{x}/{y}")
+    @PostMapping(URL + "/attack/{gameId}/{x}/{y}")
     public AttackResult attack(@PathVariable int gameId, @PathVariable int x, @PathVariable int y) {
         try {
             Game game = service.getGame(gameId);
@@ -50,5 +37,32 @@ public class SchiffeVersenkenController {
         } catch (IllegalArgumentException e) {
             return new AttackResult(false, "Game not found");
         }
+    }
+
+    @GetMapping(URL + "/game/{gameId}/getBoard/{playerId}")
+    public FieldState[][] getBoardByPlayerId(@PathVariable int gameId, @PathVariable int playerId) {
+        Game game = service.getGame(gameId);
+        return game.getBoard(playerId);
+    }
+
+    @GetMapping(URL + "/game/{gameId}/player/{playerName}")
+    public String getPlayerId(@PathVariable int gameId, @PathVariable String playerName) {
+        Game game = service.getGame(gameId);
+        if (game == null) {
+            return "Game not found";
+        }
+        return game.getPlayerId(playerName) == 1 ? "1" : "2";
+    }
+
+    @GetMapping(URL + "/game/{gameId}/player/id/{playerId}")
+    public PlayerInfo getPlayerName(@PathVariable int gameId, @PathVariable int playerId) {
+        Game game = service.getGame(gameId);
+        PlayerInfo pInfo = new PlayerInfo();
+        if (game == null) {
+            pInfo.setPlayerName("");
+            return pInfo;
+        }
+        pInfo.setPlayerName(game.getPlayerName(playerId));
+        return pInfo;
     }
 }

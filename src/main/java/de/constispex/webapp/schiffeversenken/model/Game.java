@@ -105,10 +105,6 @@ public class Game {
         }
     }
 
-    public GameState getGameState() {
-        return state;
-    }
-
     public AttackResult attack(Position position) {
         if (state != GameState.WAITING_FOR_MOVE) {
             throw new IllegalStateException("Game not in attack phase");
@@ -129,6 +125,36 @@ public class Game {
         } else {
             board1[position.getX()][position.getY()] = FieldState.MISS;
             return new AttackResult(false, "Nicht Getroffen");
+        }
+    }
+
+    public FieldState[][] getBoard(int playerId) {
+        if (playerId == 1) {
+            return board1;
+        } else if (playerId == 2) {
+            return board2;
+        } else {
+            throw new IllegalArgumentException("Invalid player id");
+        }
+    }
+
+    public int getPlayerId(String playerName) {
+        if (player1.getName().equals(playerName)) {
+            return 1;
+        } else if (player2.getName().equals(playerName)) {
+            return 2;
+        } else {
+            throw new IllegalArgumentException("Invalid player name");
+        }
+    }
+
+    public String getPlayerName(int playerId) {
+        if (playerId == 1) {
+            return player1.getName() != null ? player1.getName() : "";
+        } else if (playerId == 2) {
+            return player2.getName() != null ? player2.getName() : "";
+        } else {
+            throw new IllegalArgumentException("Invalid player id");
         }
     }
 }

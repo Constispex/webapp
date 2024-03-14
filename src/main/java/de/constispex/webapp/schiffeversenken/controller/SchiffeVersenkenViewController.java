@@ -1,5 +1,6 @@
 package de.constispex.webapp.schiffeversenken.controller;
 
+import de.constispex.webapp.schiffeversenken.model.Player;
 import de.constispex.webapp.schiffeversenken.service.SchiffeVersenkenService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,13 +20,13 @@ public class SchiffeVersenkenViewController {
     @GetMapping(URL + "/game/{gameId}")
     public String schiffeVersenkenGame(@PathVariable int gameId, Model model) {
         model.addAttribute("gameId", gameId);
-        String p1 = service.getGame(gameId).getPlayer1().getName();
-        String p2 = service.getGame(gameId).getPlayer2().getName();
+        Player p1 = service.getGame(gameId).getPlayer1();
+        Player p2 = service.getGame(gameId).getPlayer2();
 
         service.getGame(gameId).start();
 
-        model.addAttribute("player1", p1);
-        model.addAttribute("player2", p2);
+        if (p1 != null) model.addAttribute("player1", p1.getName());
+        if (p2 != null) model.addAttribute("player2", p2.getName());
 
         return "schiffe-versenken-game";
     }

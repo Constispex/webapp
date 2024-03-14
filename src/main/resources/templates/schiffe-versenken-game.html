@@ -5,8 +5,59 @@
     <title>Game</title>
 </head>
 <body>
-<p th:text="'Game ID: ' + ${gameId}"></p>
-<p th:text="'Player 1: ' + ${player1}"></p>
-<p th:text="'Player 2: ' + ${player2}"></p>
+<p id="game_id" th:text="'Game ID: ' + ${gameId}"></p>
+<p id="player1" th:text="'Player 1: ' + ${player1}"></p>
+<p id="player2" th:text="'Player 2: ' + ${player2}"></p>
+
+<p id="info"></p>
 </body>
+<script>
+    const infoText = document.getElementById('info').innerText
+    const player1 = document.getElementById('player1');
+    const player2 = document.getElementById('player2');
+    const svUrl = "/schiffe-versenken";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const playerName = urlParams.get('playerName');
+    const gameId = urlParams.get('gameId');
+
+    fetch(svUrl + "/game/" + gameId + "/player/" + playerName,
+        {
+            method: "GET",
+        })
+        .then(response => response.text())
+        .then(data => {
+            let intervallId;
+            console.log(data);
+
+            function waitForPlayer2() {
+                fetch(svUrl + "/game/" + gameId + "/player/id/" + 2,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("wait for player: " + data.playerName);
+                        if (data.playerName !== "") {
+                            player2.innerHTML = "Player 2: " + data.playerName;
+                            clearInterval(intervallId);
+                        }
+                    })
+                    .catch(error => console.error(error));
+            }
+
+            if (data === "1") {
+                player1.style.color = "red";
+                player2.style.color = "black";
+                intervallId = setInterval(waitForPlayer2, 1000)
+            } else {
+                player2.style.color = "red";
+                player1.style.color = "black";
+            }
+        })
+        .catch(error => console.error(error));
+</script>
 </html>

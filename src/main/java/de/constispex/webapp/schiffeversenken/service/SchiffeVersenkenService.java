@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SchiffeVersenkenService {
-    private final Map<Integer, Game> games = new HashMap<>();
+    private static final Map<Integer, Game> games = new HashMap<>();
 
     public Game createGame() {
         Game game = new Game(games.size());

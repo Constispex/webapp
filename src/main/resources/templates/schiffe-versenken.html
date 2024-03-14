@@ -19,11 +19,12 @@
 <form>
     <p>Join Game</p>
     <input id="join_id" type="text">
-    <button type="submit" value="Join Game">Join Game</button>
+    <button id="join_game" type="submit" value="Join Game">Join Game</button>
 </form>
 </body>
 <script>
     const playerName = document.getElementById('player_name');
+    const joinGame = document.getElementById('join_game');
     const joinId = document.getElementById('join_id');
     const startGame = document.getElementById('start_game');
     const svUrl = "/schiffe-versenken";
@@ -40,10 +41,26 @@
             .then(response => response.text())
             .then(data => {
                 console.log(data);
-                window.location.href = "http://localhost:8080" + svUrl + "/game/" + data;
+                window.location.href = "http://localhost:8080" + svUrl + "/game/" + data + "?playerName=" + playerName.value + "&gameId=" + data;
             })
             .catch(error => console.error(error));
+    })
 
+    joinGame.addEventListener("click", ev => {
+        ev.preventDefault()
+        fetch(svUrl + "/join/" + joinId.value, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({playerName: playerName.value})
+        })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                window.location.href = "http://localhost:8080" + svUrl + "/game/" + joinId.value + "?playerName=" + playerName.value + "&gameId=" + joinId.value;
+            })
+            .catch(error => console.error(error));
     })
 </script>
 </html>
