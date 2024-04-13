@@ -1,38 +1,36 @@
 package de.constispex.webapp.schiffeversenken.model;
 
+import de.constispex.webapp.schiffeversenken.model.player.Player;
+import de.constispex.webapp.schiffeversenken.model.state.FieldState;
+import de.constispex.webapp.schiffeversenken.model.state.GameState;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
 public class Game {
-    private final int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @OneToOne
     private Player player1;
+    @OneToOne
     private Player player2;
     private GameState state;
+    @OneToOne
     private Player currPlayer;
 
-    private FieldState[][] board1;
-    private FieldState[][] board2;
+    @ElementCollection
+    private final List<FieldState> board1 = new ArrayList<>();
+    @ElementCollection
+    private final List<FieldState> board2 = new ArrayList<>();
 
-    public Game(int id) {
-        this.id = id;
-        state = GameState.WAITING_FOR_PLAYERS;
-        board1 = new FieldState[10][10];
-        board2 = new FieldState[10][10];
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                board1[i][j] = FieldState.EMPTY;
-                board2[i][j] = FieldState.EMPTY;
-            }
-        }
+    public Game() {
 
     }
 
-    public Game(int id, Player player1, Player player2, GameState state) {
-        this.id = id;
-        this.player1 = player1;
-        this.player2 = player2;
-        this.state = state;
-    }
-
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -46,6 +44,10 @@ public class Game {
 
     public GameState getState() {
         return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
     }
 
     public boolean isFull() {
@@ -64,6 +66,7 @@ public class Game {
         if (state == GameState.WAITING_FOR_PLAYERS) {
             state = GameState.WAITING_FOR_SHIPS;
         }
+        currPlayer = player1;
     }
 
     public Player getCurrPlayer() {
@@ -74,7 +77,7 @@ public class Game {
         this.currPlayer = currPlayer;
     }
 
-    public void addPlayer(Player player) {
+    public void join(Player player) {
         if (player1 == null) {
             player1 = player;
         } else if (player2 == null) {
@@ -82,60 +85,66 @@ public class Game {
         }
     }
 
-    public void placeShip(Player player, Ship ship, Position position) {
+   public void placeShip(Player player, Position position) {
         if (state != GameState.WAITING_FOR_SHIPS) {
-            throw new IllegalStateException("Game has already started");
+            throw new IllegalStateException("Game not in ship placement phase");
         }
-        if (player.equals(player1)) {
-            saveToBoard(ship, position, board1);
-        } else if (player.equals(player2)) {
-            saveToBoard(ship, position, board2);
-        }
+       if(player.isPlayer1()) {
+           board1.set(position.toInt(), FieldState.SHIP);
+       } else {
+              board2.set(position.toInt(), FieldState.SHIP);
+         }
     }
 
-    private void saveToBoard(Ship ship, Position position, FieldState[][] board) {
+    private void saveToBoard(Ship ship, Position position, List<FieldState> board) {
         if (ship.isVertical()) {
-            for (int i = 0; i < ship.getSize(); i++) {
-                board[position.getX()][position.getY() + i] = FieldState.SHIP;
-            }
+               for (int i = 0; i < ship.getSize(); i++) {
+                    board.set(position.toInt() + i, FieldState.SHIP);
+                }
         } else {
             for (int i = 0; i < ship.getSize(); i++) {
-                board[position.getX() + i][position.getY()] = FieldState.SHIP;
+                board.set(position.toInt() + i * 10, FieldState.SHIP);
             }
         }
     }
 
-    public AttackResult attack(Position position) {
+    public AttackResult attack(int playerId, Position position) {
         if (state != GameState.WAITING_FOR_MOVE) {
             throw new IllegalStateException("Game not in attack phase");
         }
-        if (currPlayer.equals(player1)) {
-            return getAttackResult(position, board2);
-        } else if (currPlayer.equals(player2)) {
-            return getAttackResult(position, board1);
+        if (currPlayer.getName().equals(getPlayer(playerId).getName())) {
+            if (currPlayer.equals(player1)) {
+                switchTurns();
+                return getAttackResult(position, board2);
+            } else if (currPlayer.equals(player2)) {
+                switchTurns();
+                return getAttackResult(position, board1);
+            } else {
+                AttackResult res = new AttackResult();
+                res.setHit(false);
+                res.setMessage("currPlayer not found");
+                return res;
+            }
         } else {
-            return new AttackResult(false, "Fehler");
+            AttackResult res = new AttackResult();
+            res.setHit(false);
+            res.setMessage("Not your turn");
+            return res;
         }
     }
 
-    private AttackResult getAttackResult(Position position, FieldState[][] board1) {
-        if (board1[position.getX()][position.getY()] == FieldState.SHIP) {
-            board1[position.getX()][position.getY()] = FieldState.HIT;
-            return new AttackResult(true, "Getroffen");
+    private AttackResult getAttackResult(Position position, List<FieldState> board1) {
+        AttackResult res = new AttackResult();
+        if (board1.get(position.toInt()) == FieldState.SHIP) {
+            res.setHit(true);
+            res.setMessage("Hit");
+            board1.set(position.toInt(), FieldState.HIT);
         } else {
-            board1[position.getX()][position.getY()] = FieldState.MISS;
-            return new AttackResult(false, "Nicht Getroffen");
+            res.setHit(false);
+            res.setMessage("Miss");
+            board1.set(position.toInt(), FieldState.MISS);
         }
-    }
-
-    public FieldState[][] getBoard(int playerId) {
-        if (playerId == 1) {
-            return board1;
-        } else if (playerId == 2) {
-            return board2;
-        } else {
-            throw new IllegalArgumentException("Invalid player id");
-        }
+        return res;
     }
 
     public int getPlayerId(String playerName) {
@@ -148,13 +157,21 @@ public class Game {
         }
     }
 
-    public String getPlayerName(int playerId) {
+    public Player getPlayer(int playerId) {
         if (playerId == 1) {
-            return player1.getName() != null ? player1.getName() : "";
+            return player1;
         } else if (playerId == 2) {
-            return player2.getName() != null ? player2.getName() : "";
+            return player2;
         } else {
             throw new IllegalArgumentException("Invalid player id");
         }
+    }
+
+    public boolean canStart() {
+        return player1 != null && player2 != null && player1.isReady() && player2.isReady();
+    }
+
+    public List<FieldState> getBoard(int playerId) {
+        return getPlayer1().isPlayer1() ? board1 : board2;
     }
 }

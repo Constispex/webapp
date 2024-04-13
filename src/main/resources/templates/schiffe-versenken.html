@@ -57,7 +57,7 @@
         })
             .then(response => response.text())
             .then(data => {
-                console.log(data);
+                console.log("join: " + data);
                 window.location.href = "http://localhost:8080" + svUrl + "/game/" + joinId.value + "?playerName=" + playerName.value + "&gameId=" + joinId.value;
             })
             .catch(error => console.error(error));

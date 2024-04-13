@@ -1,6 +1,6 @@
 package de.constispex.webapp.schiffeversenken.controller;
 
-import de.constispex.webapp.schiffeversenken.model.Player;
+import de.constispex.webapp.schiffeversenken.model.player.Player;
 import de.constispex.webapp.schiffeversenken.service.SchiffeVersenkenService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class SchiffeVersenkenViewController {
     private static final String URL = "/schiffe-versenken";
-    private final SchiffeVersenkenService service = new SchiffeVersenkenService();
+    private final SchiffeVersenkenService service;
+
+    public SchiffeVersenkenViewController(SchiffeVersenkenService service) {
+        this.service = service;
+    }
 
     @GetMapping(URL)
     public String schiffeVersenken() {
@@ -24,6 +28,7 @@ public class SchiffeVersenkenViewController {
         Player p2 = service.getGame(gameId).getPlayer2();
 
         service.getGame(gameId).start();
+
 
         if (p1 != null) model.addAttribute("player1", p1.getName());
         if (p2 != null) model.addAttribute("player2", p2.getName());

@@ -1,6 +1,13 @@
 package de.constispex.webapp.schiffeversenken.model;
 
+import jakarta.persistence.*;
+
+@Entity
 public class Ship {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private int size;
     private boolean vertical;
 
@@ -18,5 +25,9 @@ public class Ship {
 
     public boolean isVertical() {
         return vertical;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

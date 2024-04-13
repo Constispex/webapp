@@ -1,11 +1,25 @@
 package de.constispex.webapp.schiffeversenken.model;
 
-public class AttackResult {
-    private final boolean hit;
-    private final String message;
+import jakarta.persistence.Embeddable;
 
-    public AttackResult(boolean hit, String message) {
+@Embeddable
+public class AttackResult {
+    boolean hit;
+    String message;
+
+    public boolean isHit() {
+        return hit;
+    }
+
+    public void setHit(boolean hit) {
         this.hit = hit;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
         this.message = message;
     }
 }

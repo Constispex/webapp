@@ -1,20 +1,32 @@
 package de.constispex.webapp.hangman.model;
 
-import java.util.List;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Embeddable
 public class GuessResponse {
     private boolean isCorrect;
     private String guessedWord;
     private int tries;
+    private String guessedLettersString; // neues Attribut, um die guessedLetters in der Datenbank zu speichern
+    @ElementCollection
     private List<Character> guessedLetters;
     private String message;
 
     public GuessResponse(boolean isCorrect, String guessedWord, int tries, List<Character> guessedLetters, String message) {
         this.isCorrect = isCorrect;
         this.guessedWord = guessedWord;
-        this.guessedLetters = guessedLetters;
         this.tries = tries;
         this.message = message;
+        setGuessedLetters(guessedLetters);
+    }
+
+    public GuessResponse() {
+
     }
 
     public List<Character> getGuessedLetters() {
@@ -25,12 +37,20 @@ public class GuessResponse {
         this.guessedLetters = guessedLetters;
     }
 
-    public boolean isCorrect() {
-        return isCorrect;
+    public String getMessage() {
+        return message;
     }
 
-    public void setCorrect(boolean correct) {
-        isCorrect = correct;
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public int getTries() {
+        return tries;
+    }
+
+    public void setTries(int tries) {
+        this.tries = tries;
     }
 
     public String getGuessedWord() {
@@ -39,21 +59,5 @@ public class GuessResponse {
 
     public void setGuessedWord(String guessedWord) {
         this.guessedWord = guessedWord;
-    }
-
-    public int getTries() {
-        return tries;
-    }
-
-    public void setTries(int tries) {
-        this.tries = Math.max(tries, 0);
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }
